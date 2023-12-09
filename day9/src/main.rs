@@ -13,45 +13,47 @@ fn main() {
     second_part(&content);
 }
 
-fn predict_next_val(history: &Vec<i32>)->i32 {
-    if history.iter().all(|val| *val == 0) {
+fn predict_next_val(history: &mut Vec<i32>, len: usize)->i32 {
+    if history.iter().enumerate().all(|(idx,val)| *val == 0 || idx >= len-1) {
         return 0;
     }
-    let mut deriv_seq = vec![0; history.len()-1];
-    for (idx, val) in deriv_seq.iter_mut().enumerate() {
-        *val = history[idx+1] - history[idx];
+    let last = history[len-1];
+    for idx in 0..len-1 {
+        history[idx] = history[idx+1] - history[idx];
     }
-    history.last().unwrap_or(&0) + predict_next_val(&deriv_seq)
+    last + predict_next_val(history, len -1)
 }
 
 fn first_part(content: &String) {
     let lines = content.lines();
     let re = Regex::new(r"[-\d]+").unwrap();
     let total = lines.fold(0, |acc,line| {
-        let history: Vec<i32> = re.find_iter(line).map(|s| s.as_str().parse().expect("Failed to parse")).collect();
-        let next_val = predict_next_val(&history);
+        let mut history: Vec<i32> = re.find_iter(line).map(|s| s.as_str().parse().expect("Failed to parse")).collect();
+        let len = history.len();
+        let next_val = predict_next_val(&mut history, len);
         acc+next_val
     });
     println!("Sum of predicted values is: {total}");
 }
 
-fn predict_previous_val(history: &Vec<i32>)->i32 {
-    if history.iter().all(|val| *val == 0) {
+fn predict_previous_val(history: &mut Vec<i32>, len: usize)->i32 {
+    if history.iter().enumerate().all(|(idx,val)| *val == 0 || idx >= len-1) {
         return 0;
     }
-    let mut deriv_seq = vec![0; history.len()-1];
-    for (idx, val) in deriv_seq.iter_mut().enumerate() {
-        *val = history[idx+1] - history[idx];
+    let first = history[0];
+    for idx in 0..len-1 {
+        history[idx] = history[idx+1] - history[idx];
     }
-    history.first().unwrap_or(&0) - predict_previous_val(&deriv_seq)
+    first - predict_previous_val(history, len-1)
 }
 
 fn second_part(content: &String) {
     let lines = content.lines();
     let re = Regex::new(r"[-\d]+").unwrap();
     let total = lines.fold(0, |acc,line| {
-        let history: Vec<i32> = re.find_iter(line).map(|s| s.as_str().parse().expect("Failed to parse")).collect();
-        let next_val = predict_previous_val(&history);
+        let mut history: Vec<i32> = re.find_iter(line).map(|s| s.as_str().parse().expect("Failed to parse")).collect();
+        let len = history.len();
+        let next_val = predict_previous_val(&mut history, len);
         acc+next_val
     });
     println!("Sum of previous values is: {total}");
