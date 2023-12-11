@@ -9,17 +9,11 @@ fn main() {
     let content = fs::read_to_string(file_path)
         .expect("should have been able to read the file");
 
-    first_part(&content);
-    second_part(&content);
+    compute(&content)
 }
 
-fn second_part(content: &String) {
-    compute(content, 1000000);
-}
-
-fn first_part(content: &String) {
-    compute(content, 2);
-}
+const SECOND_PART_MULTIPLIER: i32 = 1000000;
+const FIRST_PART_MULTIPLIER: i32 = 2;
 
 fn from_coord(coord: (usize,usize), nb_column: usize) -> usize {
     coord.0*nb_column + coord.1
@@ -28,7 +22,7 @@ fn to_coord(index: usize, nb_column: usize) -> (i32,i32) {
     ((index/nb_column) as i32,(index%nb_column) as i32)
 }
 
-fn compute(content: &String, multiplication_factor: i32) {
+fn compute(content: &String) {
     // let nb_line = content.lines().count();
     let nb_column = content.lines().next().map(|s| s.len()).expect("Input file should have text");
     let mut empty_lines = vec!();
@@ -57,8 +51,8 @@ fn compute(content: &String, multiplication_factor: i32) {
         }
     }
     let len = galaxies.len();
-    let mut sum: u64 = 0;
-    let empty_expantion = multiplication_factor-1;
+    let mut sum_1: u64 = 0;
+    let mut sum_2: u64 = 0;
     for i in 0..len {
         for j in (i+1)..len {
             let coord_i = to_coord(galaxies[i], nb_column);
@@ -80,8 +74,10 @@ fn compute(content: &String, multiplication_factor: i32) {
                 acc
             });
             let distance = (coord_i.0-coord_j.0).abs() + (coord_j.1-coord_i.1).abs();
-            sum+=(distance + expanded_col*empty_expantion + expanded_lines*empty_expantion) as u64;
+            sum_1+=(distance + (expanded_col + expanded_lines)*(FIRST_PART_MULTIPLIER-1)) as u64;
+            sum_2+=(distance + (expanded_col + expanded_lines)*(SECOND_PART_MULTIPLIER-1)) as u64;
         }
     }
-    println!("Sum of distances: {}", sum);
+    println!("Sum of distances (mult {FIRST_PART_MULTIPLIER}): {}", sum_1);
+    println!("Sum of distances (mult {SECOND_PART_MULTIPLIER}): {}", sum_2);
 }
