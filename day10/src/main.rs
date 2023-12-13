@@ -1,6 +1,5 @@
 use std::fs;
 use std::env;
-use regex::Regex;
 use std::panic;
 
 fn main() {
